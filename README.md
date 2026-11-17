@@ -1,2 +1,2 @@
 # Project-C
-All of my project in C
+All of my projects in C
