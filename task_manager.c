@@ -1,34 +1,53 @@
 #include <stdio.h>		//sistemare deletetask aggiungendo file
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #define DIM 30 /* 30 numero massimo di task */
 
-void addtask(char **);
+void addtask(char **, FILE *);
 void listtask(char **);
-void deletetask(char **);
+void deletetask(char **, FILE *);
 
 
 int main() {
 	int user;
 	int i, flag;
 	char *tasks[DIM];
-	char task_temp;
+	char task_temp[100];
+
 	i = 0;
 
-	FILE = *f;
-	fopen("tasks.txt", "a+");
+	FILE *f;
+	f = fopen("tasks.txt", "a+");
 	if (f == NULL){
 		printf("Errore apertura file tasks.txt\n");
+		return 1;
 	}
 
 	/*rendo tutte le task = 0; */
 	for (i = 0; i < DIM; i++)
 		tasks[i] = NULL;
 
-	while(fscanf(f, "%s", &task_temp) == 1){
-		tasks[i] = task_temp;
+	rewind(f);
+
+	i = 0;
+
+	while(i < DIM){
+		if (fscanf(f, " %99[^\n]", task_temp) != 1)
+			break;
+
+		tasks[i] = malloc(strlen(task_temp) + 1);
+
+		if (tasks[i] == NULL){
+			printf("errore di allocazione memoria");
+			rewind(f);
+			fclose(f);
+			return 1;
+		}
+		strcpy(tasks[i], task_temp);
 		i++;
 	}
+
 
 	flag = 1;
 
@@ -37,31 +56,41 @@ int main() {
 		"- Add tasks\n"
 		"- List tasks\n" /* da aggiungere completa e task completate*/
 		"- Delete tasks\n"
-		"- Search tasks\n");
+		"- close app\n");
 
 	while (flag){
 		printf("\nInserire il numero dell'azione che vuoi fare: ");
 		scanf("%d", &user);
-		switch (user){
-			case 1:
-				addtask(tasks);
-				break;
-			case 2:
-				listtask(tasks);
-				break;
-			case 3:
-				deletetask(tasks);
-				break;
-			/*case 4:
-				searchtask();
-				break; */
-		}
+		if (user == 1 || user == 2 || user == 3 || user == 4){
+			system("clear");
+			switch (user){
+				case 1:
+					addtask(tasks, f);
+					break;
+				case 2:
+					listtask(tasks);
+					break;
+				case 3:
+					deletetask(tasks, f);
+					break;
+				case 4:
+					rewind(f);
+					fclose(f);
+					return 0;
+				/*case 4:
+					searchtask();
+					break; */
+				default:
+					printf("Azione non valida, riprovare.");
+			}
+		}else
+			printf("Errore, valore inserito non valido.");
 	}
 
 	return 0;
 }
 
-void addtask(char **tasks){
+void addtask(char **tasks, FILE *f){
 	char *task;
 	int i, flag;
 	flag = 1;
@@ -113,8 +142,9 @@ void listtask(char **tasks){
 	return;
 }
 
-void deletetask(char **tasks){
+void deletetask(char **tasks, FILE *f){
 	int num, i;
+	char *task;
 	listtask(tasks);
 
 	printf("\nInserire il numero della task da eliminare: ");
@@ -128,7 +158,18 @@ void deletetask(char **tasks){
 		}else 
 			return;
 	}
-
+	//devo cancellare tutto il file e riscriverlo sistemato
+	fclose(f);
+	fopen("tasks.txt", "w");
+	fclose(f);
+	fopen("tasks.txt", "ab+");
+	while(tasks[i] != NULL){
+		task = malloc(strlen(tasks[i]) + 1);
+		strcpy(tasks[i], task);
+		fprintf(f, "%s\n", task);
+		i++;
+	}
+	free(task);
 	printf("Task %d eliminata!", num);
 	return;
 }
