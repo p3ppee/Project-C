@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdio.h>		//sistemare deletetask aggiungendo file
 #include <string.h>
 #include <stdlib.h>
 #define DIM 30 /* 30 numero massimo di task */
@@ -12,9 +12,23 @@ int main() {
 	int user;
 	int i, flag;
 	char *tasks[DIM];
+	char task_temp;
+	i = 0;
+
+	FILE = *f;
+	fopen("tasks.txt", "a+");
+	if (f == NULL){
+		printf("Errore apertura file tasks.txt\n");
+	}
+
 	/*rendo tutte le task = 0; */
 	for (i = 0; i < DIM; i++)
 		tasks[i] = NULL;
+
+	while(fscanf(f, "%s", &task_temp) == 1){
+		tasks[i] = task_temp;
+		i++;
+	}
 
 	flag = 1;
 
@@ -69,6 +83,7 @@ void addtask(char **tasks){
 				return;
 			}
 			strcpy(tasks[i], task);		/*devo usare array di puntatori di caratteri*/
+			fprintf(f, "%s\n", tasks[i]);
 			flag = 0;
 		}
 	}
